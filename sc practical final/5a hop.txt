@@ -1,0 +1,70 @@
+import numpy as np
+class HopfieldNetwork:
+
+def __init__(self, size):
+self.size = size
+# Initialize weight matrix W to zeros.
+# W[i, j] represents the connection strength between neuron i and j.
+self.weights = np.zeros((size, size))
+print(f"Network initialized with {size} neurons.")
+def train(self, patterns):
+print(f"\nTraining network on {len(patterns)} patterns...")
+for pattern in patterns:
+# Ensure the pattern is a column vector
+pattern = pattern.reshape(self.size, 1)
+# Hebbian rule: W = W + (pattern * pattern.T)
+# This calculation stores the pattern in the weights.
+self.weights += np.dot(pattern, pattern.T)
+# Set the diagonal elements of the weight matrix to zero (no self-connection)
+np.fill_diagonal(self.weights, 0)
+print("Training complete. Weights calculated.")
+def retrieve(self, pattern, max_iterations=10):
+# Start with the input pattern
+current_state = pattern.copy()
+print(f"\nAttempting retrieval (Max Iterations: {max_iterations})...")
+for iteration in range(max_iterations):
+previous_state = current_state.copy()
+
+net_input = np.dot(self.weights, current_state)
+current_state = np.where(net_input >= 0, 1, -1)
+# Check for convergence (stability)
+if np.array_equal(current_state, previous_state):
+print(f"Converged at iteration {iteration + 1}.")
+break
+print(f"Iteration {iteration + 1}: State changed.")
+else:
+print(f"Did not fully converge after {max_iterations} iterations.")
+return current_state
+
+# --- Example Usage ---
+# 1. Define the size of the network (must match the length of the patterns)
+NETWORK_SIZE = 8
+pattern_p = np.array([ 1, 1, 1, 1, -1, 1, -1, -1])
+
+pattern_h = np.array([ 1, -1, 1, 1, 1, -1, 1, 1])
+# Create an instance of the network
+hopfield = HopfieldNetwork(NETWORK_SIZE)
+# Train the network
+hopfield.train([pattern_p, pattern_h])
+
+noisy_p = np.array([ 1, 1, 1, 1, 1, 1, 1, -1]) # Target: [1, 1, 1, 1, -1, 1, -1, -1]
+# Function to display patterns nicely
+def print_pattern(label, pattern):
+print(f"{label}: {''.join(['■' if x == 1 else '□' for x in pattern])} ({pattern.tolist()})")
+
+print("\n--- Retrieval Test ---")
+# Display the original andnoisy patterns
+
+print_pattern("Original Pattern P", pattern_p)
+print_pattern("Noisy Input", noisy_p)
+
+# Retrieve the clean pattern
+retrieved_p = hopfield.retrieve(noisy_p)
+
+# Display the result
+print_pattern("Retrieved Output", retrieved_p)
+# Verify if the retrieval was successful
+if np.array_equal(retrieved_p, pattern_p):
+print("\nSUCCESS: Retrieved pattern matches the original Pattern P.")
+else:
+print("\nFAILURE: Retrieval did not match the original pattern.")

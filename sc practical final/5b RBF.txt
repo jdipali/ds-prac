@@ -1,0 +1,107 @@
+import numpy as np
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+class RBFNetwork:
+def __init__(self, num_centers, sigma=None):
+self.num_centers = num_centers
+self.sigma = sigma
+self.centers = None
+self.weights = None
+def _radial_basis_function(self, x, center):
+# Calculate Euclidean distance squared
+distance_sq = np.linalg.norm(x - center) ** 2
+# Apply the Gaussian function
+return np.exp(-distance_sq / (2 * self.sigma ** 2))
+def train(self, X, y):
+print("--- Training RBF Network ---")
+# 1. Select Centers (mu) using K-Means clustering
+print(f"1. Clustering {self.num_centers} centers using K-Means...")
+kmeans = KMeans(n_clusters=self.num_centers, n_init=10, random_state=42)
+kmeans.fit(X)
+self.centers = kmeans.cluster_centers_
+# 2. Calculate Sigma (Spread)
+# Sigma is often chosen based on the maximum distance between the chosen centers.
+if self.sigma is None:
+print("2. Automatically calculating sigma...")
+max_dist = 0
+# Find the maximum distance between any pair of centers
+for i in range(self.num_centers):
+for j in range(i + 1, self.num_centers):
+dist = np.linalg.norm(self.centers[i] - self.centers[j])
+if dist > max_dist:
+max_dist = dist
+# Heuristic: sigma = max_distance / sqrt(2 * num_centers)
+self.sigma = max_dist / np.sqrt(2 * self.num_centers)
+print(f" Calculated Sigma: {self.sigma:.4f}")
+else:
+print(f"2. Using provided Sigma: {self.sigma:.4f}")
+
+# 3. Build the RBF activation matrix (Phi)
+# Phi will be N x K, where N is samples, K is number of centers
+N = X.shape[0]
+Phi = np.zeros((N, self.num_centers))
+print("3. Building RBF activation matrix (Phi)...")
+for i in range(N):
+for j in range(self.num_centers):
+# Calculate the RBF output for sample i and center j
+Phi[i, j] = self._radial_basis_function(X[i], self.centers[j])
+# 4. Solve for the weights (W) using the pseudo-inverse
+# W = inv(Phi.T * Phi) * Phi.T * y -> simplified to pinv(Phi) * y
+print("4. Calculating output layer weights (W) using pseudo-inverse...")
+self.weights = np.dot(np.linalg.pinv(Phi), y)
+print("Training complete.")
+def predict(self, X):
+"""
+Predicts the output for new data.
+Args:
+X (np.ndarray): Input data features (N samples, D features).
+Returns:
+np.ndarray: Predicted targets (N samples).
+"""
+if self.centers is None or self.weights is None:
+raise Exception("Model not trained. Call train() first.")
+N = X.shape[0]
+Phi = np.zeros((N, self.num_centers))
+# Build the RBF activation matrix for prediction data
+for i in range(N):
+for j in range(self.num_centers):
+Phi[i, j] = self._radial_basis_function(X[i], self.centers[j])
+# Output = Phi * W
+return np.dot(Phi, self.weights)
+
+# --- Example Usage: Function Approximation ---
+if __name__ == '__main__':
+# 1. Generate a sample 1D dataset (a sine wave)
+# Generate 50 training points
+X_train = np.linspace(-3 * np.pi, 3 * np.pi, 50).reshape(-1, 1)
+y_train = np.sin(X_train).flatten() + np.random.normal(0, 0.1, X_train.shape[0])
+# Generate 100 test points for smooth prediction plot
+X_test = np.linspace(-3 * np.pi, 3 * np.pi, 100).reshape(-1, 1)
+y_true = np.sin(X_test).flatten()
+# 2. Initialize and Train the RBF Network
+# We will use 10 basis functions (centers)
+NUM_CENTERS = 10
+# Instantiate the network
+rbf_net = RBFNetwork(num_centers=NUM_CENTERS)
+# Train the network on the noisy sine data
+rbf_net.train(X_train, y_train)
+# 3. Predict on the test data
+y_pred = rbf_net.predict(X_test)
+# 4. Visualization
+plt.figure(figsize=(10, 6))
+# Plot true function
+plt.plot(X_test, y_true, 'r-', label='True Function (sin(x))', linewidth=2)
+# Plot noisy training data
+plt.plot(X_train, y_train, 'ko', label='Training Data (Noisy)', markersize=4)
+# Plot RBF network predictions
+plt.plot(X_test, y_pred, 'b--', label='RBF Network Prediction', linewidth=2)
+# Plot RBF centers for visualization
+plt.plot(rbf_net.centers, [0] * NUM_CENTERS, 'g^', label='RBF Centers', markersize=8)
+plt.title(f'RBF Network Approximation (K={NUM_CENTERS})')
+plt.xlabel('X')
+plt.ylabel('Y')
+
+plt.legend()
+plt.grid(True, linestyle='--')
+plt.show()

@@ -1,0 +1,117 @@
+import random
+# --- 1. CONFIGURATION ---
+TARGET = '10101010'
+GENE_LENGTH = len(TARGET)
+POPULATION_SIZE = 100
+MUTATION_RATE = 0.05
+GENERATIONS = 200
+ELITISM_COUNT = 2 # Number of best individuals to carry over directly
+# --- 2. FITNESS FUNCTION (EVALUATION) ---
+def calculate_fitness(individual):
+"""
+Fitness is the number of matching bits between the individual and the target.
+
+Higher is better (goal is to maximize this score).
+"""
+fitness = 0
+for i in range(GENE_LENGTH):
+if individual[i] == TARGET[i]:
+fitness += 1
+return fitness
+# --- 3. INITIALIZATION ---
+def create_individual():
+"""Creates a random binary string individual."""
+return ''.join(random.choice('01') for _ in range(GENE_LENGTH))
+def create_initial_population():
+"""Creates the initial population."""
+return [create_individual() for _ in range(POPULATION_SIZE)]
+# --- 4. SELECTION (Tournament Selection) ---
+def selection(population, fitnesses):
+"""
+Uses tournament selection to choose a parent.
+A small group competes, and the best one wins.
+"""
+tournament_size = 5
+# Choose 'tournament_size' random indices
+competitors_indices = random.sample(range(POPULATION_SIZE), tournament_size)
+best_index = -1
+best_fitness = -1
+# Find the best competitor
+for index in competitors_indices:
+if fitnesses[index] > best_fitness:
+best_fitness = fitnesses[index]
+best_index = index
+return population[best_index]
+# --- 5. CROSSOVER (Single-Point Crossover) ---
+def crossover(parent1, parent2):
+"""
+Creates two children by swapping tails after a random crossover point.
+"""
+
+# Choose a random split point (excluding the start and end)
+crossover_point = random.randint(1, GENE_LENGTH - 1)
+child1 = parent1[:crossover_point] + parent2[crossover_point:]
+child2 = parent2[:crossover_point] + parent1[crossover_point:]
+return child1, child2
+# --- 6. MUTATION (Bit-Flip Mutation) ---
+def mutate(individual):
+"""
+Flips a bit ('0' -> '1' or '1' -> '0') with a small probability (MUTATION_RATE).
+"""
+mutated_list = list(individual)
+for i in range(GENE_LENGTH):
+if random.random() < MUTATION_RATE:
+# Flip the bit
+mutated_list[i] = '1' if mutated_list[i] == '0' else '0'
+return "".join(mutated_list)
+# --- 7. THE MAIN GA LOOP ---
+def run_genetic_algorithm():
+population = create_initial_population()
+print(f"Target String: {TARGET}")
+print("---------------------------------")
+for generation in range(1, GENERATIONS + 1):
+# 7a. Evaluate/Calculate Fitness
+# Create a list of tuples: [(individual, fitness), ...]
+evaluated_population = []
+for individual in population:
+fitness = calculate_fitness(individual)
+evaluated_population.append((individual, fitness))
+# Sort by fitness (descending)
+evaluated_population.sort(key=lambda x: x[1], reverse=True)
+best_individual, best_fitness = evaluated_population[0]
+# Print status
+if generation % 20 == 0 or best_fitness == GENE_LENGTH:
+
+print(f"Gen {generation:3d}: Best Fit = {best_fitness}/{GENE_LENGTH}, Individual =
+{best_individual}")
+# Termination condition: Found the target
+if best_fitness == GENE_LENGTH:
+print("\n🎉 Target found! Stopping GA.")
+break
+# Create the next generation
+new_population = []
+# 7b. Elitism: Carry over the best individuals directly
+for i in range(ELITISM_COUNT):
+new_population.append(evaluated_population[i][0])
+# 7c. Generate the rest of the new population
+while len(new_population)< POPULATION_SIZE:
+# Prepare population list for selection function
+current_population = [item[0] for item in evaluated_population]
+current_fitnesses = [item[1] for item in evaluated_population]
+# Selection
+parent1 = selection(current_population, current_fitnesses)
+parent2 = selection(current_population, current_fitnesses)
+# Crossover
+child1, child2 = crossover(parent1, parent2)
+# Mutation
+child1 = mutate(child1)
+child2 = mutate(child2)
+# Add to the new population
+new_population.append(child1)
+if len(new_population) < POPULATION_SIZE:
+new_population.append(child2)
+# Replace the old population with the new one
+population = new_population
+# --- EXECUTE ---
+if __name__ == '__main__':
+run_genetic_algorithm()

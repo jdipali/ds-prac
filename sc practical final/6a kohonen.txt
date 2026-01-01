@@ -1,0 +1,172 @@
+import numpy as np
+import matplotlib.pyplot as plt
+class SOM:
+"""
+A simple implementation of a Kohonen Self-Organizing Map (SOM).
+"""
+def __init__(self, input_dim, map_width, map_height, initial_lr=0.5, initial_radius=None):
+"""
+Initializes the SOM.
+
+Args:
+input_dim (int): The dimension of the input data vectors.
+map_width (int): The width (x-dimension) of the map grid.
+map_height (int): The height (y-dimension) of the map grid.
+initial_lr (float): The starting learning rate.
+initial_radius (float, optional): The starting neighborhood radius.
+
+If None, defaults to half the maximum map dimension.
+
+"""
+self.input_dim = input_dim
+self.map_shape = (map_width, map_height)
+self.initial_lr = initial_lr
+# Initialize the radius
+if initial_radius is None:
+self.initial_radius = max(map_width, map_height) / 2.0
+else:
+self.initial_radius = initial_radius
+# The weights matrix: (map_width, map_height, input_dim)
+# Weights are the vector associated with each neuron on the grid
+self.weights = np.random.rand(map_width, map_height, input_dim)
+# Create a grid of neuron coordinates for neighborhood calculation
+self.neuron_coords = np.array([[i, j] for i in range(map_width) for j in range(map_height)])
+print(f"SOM initialized: {map_width}x{map_height} map, Input Dim: {input_dim}")
+def _find_bmu(self, input_vector):
+"""
+Finds the Best Matching Unit (BMU) for a given input vector.
+The BMU is the neuron with the weight vector closest (minimum Euclidean distance)
+to the input vector.
+Args:
+input_vector (np.ndarray): The current input data point.
+Returns:
+tuple: Coordinates (x, y) of the BMU.
+"""
+# Calculate the Euclidean distance squared between the input_vector and all weights
+# np.linalg.norm(A - B) -> calculates distance
+distances = np.linalg.norm(self.weights - input_vector, axis=2)
+# Find the index of the minimum distance in the flattened array
+
+bmu_index_flat = np.argmin(distances)
+# Convert the flat index back to 2D coordinates (x, y)
+bmu_coords = np.unravel_index(bmu_index_flat, self.map_shape)
+return bmu_coords
+def _update_weights(self, input_vector, bmu_coords, iteration, max_iterations):
+"""
+Updates the weights of the neurons based on their distance from the BMU.
+The learning rate and neighborhood radius decay over time.
+Args:
+input_vector (np.ndarray): The current input data point.
+bmu_coords (tuple): The (x, y) coordinates of the BMU.
+iteration (int): The current training iteration.
+max_iterations (int): Total number of iterations (for decay calculation).
+"""
+# Time decay constant
+time_constant = max_iterations / np.log(self.initial_radius)
+# Calculate current neighborhood radius (sigma)
+current_radius = self.initial_radius * np.exp(-iteration / time_constant)
+radius_sq = current_radius ** 2
+# Calculate current learning rate (alpha)
+current_lr = self.initial_lr * np.exp(-iteration / max_iterations)
+# Get the coordinates of the BMU in the coordinate grid
+bmu_x, bmu_y = bmu_coords
+bmu_coord_vec = np.array([bmu_x, bmu_y])
+# Calculate squared distance of ALL neurons from the BMU
+# This uses the pre-computed grid of neuron coordinates
+dist_sq_from_bmu = np.sum((self.neuron_coords - bmu_coord_vec) ** 2, axis=1)
+# Calculate the Neighborhood Function (h_ci)
+# h_ci = exp(-dist_sq / (2 * sigma_sq))
+neighborhood_func = np.exp(-dist_sq_from_bmu / (2 * radius_sq))
+# Reshape the neighborhood function to match the weights matrix for broadcasting
+# The map needs to be flattened (W*H), then broadcasted across the input_dim (D)
+neighborhood_map = neighborhood_func.reshape(self.map_shape[0], self.map_shape[1],
+1)
+
+# Calculate the weight adjustment (Delta W):
+# Delta W = LR * h_ci * (Input - Weight)
+weight_diff = input_vector - self.weights
+delta_w = current_lr * neighborhood_map * weight_diff
+# Apply the update
+self.weights += delta_w
+
+def train(self, data, num_epochs):
+"""
+Main training loop for the SOM.
+Args:
+data (np.ndarray): The training data (N samples, D features).
+num_epochs (int): The number of times to iterate over the entire dataset.
+"""
+max_iterations = num_epochs * data.shape[0]
+iteration = 0
+print(f"\nStarting training for {num_epochs} epochs ({max_iterations} updates)...")
+for epoch in range(num_epochs):
+# Shuffle data for stochastic training
+np.random.shuffle(data)
+for input_vector in data:
+# 1. Find the BMU
+bmu_coords = self._find_bmu(input_vector)
+# 2. Update weights based on neighborhood
+self._update_weights(input_vector, bmu_coords, iteration, max_iterations)
+iteration += 1
+print("Training finished.")
+
+# --- Example Usage: Clustering 2D Data ---
+if __name__ == '__main__':
+# 1. Create Synthetic 2D Data (3 distinct clusters)
+np.random.seed(42)
+
+# Cluster 1 (Bottom Left)
+c1 = np.random.rand(50, 2) * 2 + np.array([1, 1])
+# Cluster 2 (Top Right)
+c2 = np.random.rand(50, 2) * 2 + np.array([6, 6])
+# Cluster 3 (Middle)
+c3 = np.random.rand(50, 2) * 2 + np.array([3, 8])
+# Combine data and normalize (important for SOM performance)
+data = np.vstack((c1, c2, c3))
+data_normalized = (data - np.min(data, axis=0)) / (np.max(data, axis=0) - np.min(data,
+axis=0))
+# Define SOM parameters
+INPUT_DIM = data_normalized.shape[1] # 2 dimensions (x, y)
+MAP_WIDTH = 10 # 10 neurons wide
+MAP_HEIGHT = 10 # 10 neurons high
+NUM_EPOCHS = 50 # Training iterations
+# 2. Initialize and Train the SOM
+som_net = SOM(
+input_dim=INPUT_DIM,
+map_width=MAP_WIDTH,
+map_height=MAP_HEIGHT,
+initial_lr=0.8,
+initial_radius=5.0
+)
+# Train the network
+som_net.train(data_normalized, NUM_EPOCHS)
+# 3. Visualization
+# Get the final weights and reshape for plotting
+final_weights = som_net.weights.reshape(-1, INPUT_DIM)
+plt.figure(figsize=(10, 8))
+# Plot the original data points
+plt.scatter(data_normalized[:, 0], data_normalized[:, 1], s=50, c='gray', label='Input Data
+Points', alpha=0.6)
+# Plot the final positions of the weights (neuron centers)
+# These should cluster around the input data clusters
+
+plt.scatter(final_weights[:, 0], final_weights[:, 1], s=150, c='r', marker='o', label='SOM Neuron
+Weights')
+# Draw lines connecting adjacent neurons to show the map structure (topology preservation)
+for i in range(MAP_WIDTH):
+for j in range(MAP_HEIGHT):
+w = som_net.weights[i, j]
+# Connect to right neighbor
+if i + 1 < MAP_WIDTH:
+w_right = som_net.weights[i + 1, j]
+plt.plot([w[0], w_right[0]], [w[1], w_right[1]], 'r-', linewidth=1)
+# Connect to top neighbor
+if j + 1 < MAP_HEIGHT:
+w_top = som_net.weights[i, j + 1]
+plt.plot([w[0], w_top[0]], [w[1], w_top[1]], 'r-', linewidth=1)
+plt.title('Kohonen Self-Organizing Map (SOM) Clustering ')
+plt.xlabel('Feature 1 (Normalized)')
+plt.ylabel('Feature 2 (Normalized)')
+plt.legend()
+plt.grid(True, linestyle=':')
+plt.show()

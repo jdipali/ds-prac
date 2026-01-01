@@ -1,0 +1,128 @@
+import numpy as np
+class ART1Network:
+def __init__(self, M, N, vigilance=0.7, learning_rate=1.0):
+self.M = M # Input Dimension
+self.N = N # Max Categories
+self.rho = vigilance
+self.beta = learning_rate
+
+# F2 Layer Activation Parameter (Small constant)
+self.epsilon = 1e-6
+
+self.W_td = np.ones((N, M))
+self.W_bu = np.ones((M, N)) / (1.0 + M)
+# Category usage tracker
+self.num_categories = 0
+print(f"ART1 Network initialized: M={M}, N={N}, Vigilance={self.rho}")
+def _choice_function(self, I):
+T = np.dot(I, self.W_bu)
+return T
+def _match_criterion(self, I, W_td_j):
+"""
+Calculates the match ratio for the vigilance test.
+Match = |I intersect W_td_j| / |I|
+|vector| is the L1 norm (sum of elements for binary vectors).
+I intersect W_td is I * W_td_j (element-wise multiplication for binary)
+"""
+intersection = I * W_td_j
+match_ratio = np.sum(intersection) / (np.sum(I) + self.epsilon) # Add epsilon for safety
+return match_ratio
+def _update_weights(self, I, J):
+"""
+Updates the weights for the Best Matching Unit (BMU) J.
+W_td, J = I intersect W_td, J
+W_bu, J = I intersect W_td, J / (epsilon + |I intersect W_td, J|)
+"""
+# Calculate the intersection (new template)
+new_template = I * self.W_td[J]
+# Update Top-Down Weights (F2 -> F1 template)
+self.W_td[J] = self.beta * new_template + (1 - self.beta) * self.W_td[J]
+
+# Update Bottom-Up Weights (F1 -> F2 preference)
+norm_new_template = np.sum(new_template)
+# Denominator in W_bu update depends on current ART version, using
+# a standard simplified form here where W_bu is derived from W_td.
+self.W_bu[:, J] = new_template / (self.epsilon + norm_new_template)
+def train(self, data):
+assignments = np.zeros(data.shape[0], dtype=int)
+print("\n--- Training ART1 Network ---")
+for i, I in enumerate(data):
+# Input must be binary
+if not np.all(np.in1d(I, [0, 1])):
+raise ValueError("Input data must be binary (0 or 1) for ART1.")
+reset_categories = np.zeros(self.N, dtype=bool)
+# Loop until resonance occurs (Match >= Vigilance) or all categories are tried
+while True:
+T = self._choice_function(I)
+# Mask out categories that have been reset
+T[reset_categories] = -1.0
+# Find the Best Matching Unit (BMU), J
+J = np.argmax(T)
+
+if T[J] < 0:
+# All existing categories checked and reset. Search fails.
+J = self.num_categories
+if J >= self.N:
+print("Error: Maximum number of categories reached.")
+break # Exit inner loop
+# Found an uncommitted category
+self.num_categories += 1
+assignments[i] = J
+# Set the new category's template to the input and update weights
+self.W_td[J] = I.copy()
+
+self._update_weights(I, J)
+# Resonance! Break inner loop.
+break
+# 2. Vigilance Test (Match Criterion)
+match_ratio = self._match_criterion(I, self.W_td[J])
+if match_ratio >= self.rho:
+# --- Resonance: Match is ACCEPTED ---
+assignments[i] = J
+self._update_weights(I, J)
+# Break inner loop.
+break
+else:
+reset_categories[J] = True
+print(f"Input {i+1} assigned to Category {assignments[i]} (Vigilance Match:
+{match_ratio:.2f})")
+return assignments
+
+# --- Example Usage: Clustering Binary Patterns ---
+if __name__ == '__main__':
+# 1. Define Binary Input Data (M=5 dimensions)
+# These represent 4 distinct patterns, with Pattern A being repeated and Pattern B noisy.
+pattern_A = np.array([1, 1, 0, 0, 0])
+pattern_B = np.array([0, 0, 1, 1, 1])
+pattern_C = np.array([1, 0, 1, 0, 1])
+pattern_D = np.array([0, 1, 0, 1, 0])
+pattern_A_repeat = np.array([1, 1, 0, 0, 0])
+pattern_B_noisy = np.array([0, 1, 1, 1, 1]) # Corrupts the 2nd element of B
+data_set = np.array([
+pattern_A,
+pattern_B,
+pattern_C,
+pattern_D,
+pattern_A_repeat,
+pattern_B_noisy,
+])
+
+M_DIM = data_set.shape[1]
+MAX_CATEGORIES = 10
+# 2. Initialize and Train the ART1 Network
+# High Vigilance (rho=0.9): Expect strict matching (more clusters)
+art_strict = ART1Network(M=M_DIM, N=MAX_CATEGORIES, vigilance=0.9)
+assignments_strict = art_strict.train(data_set)
+print("\n--- Summary (Vigilance=0.9) ---")
+print(f"Total Categories Used: {art_strict.num_categories}")
+print(f"Assignments: {assignments_strict.tolist()}")
+# Expected: 4 clusters (A, B, C, D) + 1 extra cluster for B_noisy
+# (because B_noisy is too different from B at rho=0.9) = 5 clusters.
+# Low Vigilance (rho=0.6): Expect lax matching (fewer clusters)
+art_lax = ART1Network(M=M_DIM, N=MAX_CATEGORIES, vigilance=0.6)
+assignments_lax = art_lax.train(data_set)
+print("\n--- Summary (Vigilance=0.6) ---")
+print(f"Total Categories Used: {art_lax.num_categories}")
+print(f"Assignments: {assignments_lax.tolist()}")
+# Expected: Fewer clusters. A_repeat should match A. B_noisy might match B.
+# Likely 4 clusters total (A, B, C, D)

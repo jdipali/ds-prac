@@ -1,0 +1,79 @@
+import random
+import math
+### 1. The City Class (Represents a Gene/Node) ###
+class City:
+"""
+Represents a city with a name and (x, y) coordinates.
+In the context of a Genetic Algorithm for TSP, each city is a 'gene'
+in the 'chromosome' (route).
+"""
+def __init__(self, name, x, y):
+self.name = name
+self.x = x
+self.y = y
+def distance_to(self, other_city):
+"""
+Calculates the Euclidean distance between this city and another city.
+This is a key component of the 'Fitness' calculation.
+"""
+x_diff = self.x - other_city.x
+y_diff = self.y - other_city.y
+return math.sqrt(x_diff**2 + y_diff**2)
+def __repr__(self):
+"""String representation for printing the City object."""
+return f"City('{self.name}', x={self.x}, y={self.y})"
+
+### 2. The Fitness Function (Core of the Genetic Algorithm) ###
+# Note: In many GA frameworks, the fitness logic is provided as a standalone function.
+# We wrap it in a class for good organization in this object-oriented example.
+
+class Fitness:
+def
+self.route = route
+self.distance = self.get_route_distance()
+self.fitness = self.get_fitness()
+def get_route_distance(self):
+"""
+Calculates the total distance of the round trip route.
+(City 1 -> City 2 -> ... -> Last City -> City 1)
+"""
+total_distance = 0
+# Iterate through all cities from start to the second-to-last
+for i in range(len(self.route)):
+from_city = self.route[i]
+# Connect the last city back to the first city
+to_city = self.route[i + 1] if i + 1 < len(self.route) else self.route[0]
+total_distance += from_city.distance_to(to_city)
+return total_distance
+def get_fitness(self):
+"""
+Calculates the fitness value. We use 1.0 / distance for maximization.
+"""
+# To avoid division by zero in hypothetical edge cases
+if self.distance == 0:
+return float('inf')
+return 1.0 / self.distance
+
+### Example Usage ###
+# 1. Define a set of cities
+city_list = [
+City("A", 60, 200),
+City("B", 180, 200),
+City("C", 80, 180),
+City("D", 140, 180),
+City("E", 20, 160),
+City("F", 100, 160),
+City("G", 200, 160)
+]
+
+# 2. Define a potential solution (a route/chromosome)
+# This is an initial, random order of visiting the cities
+initial_route = random.sample(city_list, len(city_list))
+print(f"--- Initial Route (Chromosome) ---")
+print([city.name for city in initial_route])
+# 3. Calculate the fitness for this solution
+route_fitness = Fitness(initial_route)
+print("\n--- Fitness Evaluation ---")
+print(f"Total Distance of Route: {route_fitness.distance:.2f}")
+# Higher fitness is better (shorter distance)
+print(f"Calculated Fitness (1/Distance): {route_fitness.fitness:.6f}")
