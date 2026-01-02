@@ -1,0 +1,32 @@
+import numpy as np
+# Step 1: Define training patterns
+# Bipolar patterns (-1, +1)
+p1 = np.array([1, -1, 1, -1])
+p2 = np.array([-1, 1, -1, 1])
+patterns = np.array([p1, p2])
+# Step 2: Initialize weight matrix
+num_neurons = patterns.shape[1]
+weights = np.zeros((num_neurons, num_neurons))
+# Hebbian learning rule
+for p in patterns:
+    weights += np.outer(p, p)
+# No self-connection
+np.fill_diagonal(weights, 0)
+print("Weight Matrix:")
+print(weights)
+# Step 3: Define activation function
+def activation(x):
+    return np.where(x >= 0, 1, -1)
+# Step 4: Test pattern (noisy input)
+test_pattern = np.array([1, -1, -1, -1])
+print("\nTest Pattern:")
+print(test_pattern)
+# Step 5: Recall process
+output = test_pattern.copy()
+for iteration in range(5):
+    net = np.dot(weights, output)
+    output = activation(net)
+    print(f"Iteration {iteration+1}: {output}")
+# Final Output
+print("\nRecalled Pattern:")
+print(output)
