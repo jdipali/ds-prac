@@ -1,0 +1,26 @@
+import pandas as pd
+# Create raw (unorganized) data
+data = {
+    "Name": ["Amit", "Riya", "Amit", "Sonal", "Riya"],
+    "Age": [22, 21, 22, 23, 21],
+    "Marks": [78, 85, 78, 90, 85]
+}
+
+# Create raw (unorganized) data
+data = {
+    "Name": ["Amit", "Riya", "Amit", "Sonal", "Riya"],
+    "Age": [22, 21, 22, 23, 21],
+    "Marks": [78, 85, 78, 90, 85]
+}
+
+# Create DataFrame
+df = pd.DataFrame(data)
+print("Original Data:")
+print(df)
+
+# Remove duplicate records
+df_cleaned = df.drop_duplicates()
+# Sort data by Marks
+df_sorted = df_cleaned.sort_values(by="Marks", ascending=False)
+print("\nOrganized Data (Duplicates Removed & Sorted):")
+print(df_sorted)
