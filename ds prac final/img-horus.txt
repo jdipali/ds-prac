@@ -1,0 +1,23 @@
+from PIL import Image
+import json
+import os
+
+image_path = "image.jpg"
+img = Image.open(image_path)
+
+info = {
+    "format": img.format,
+    "mode": img.mode,
+    "size": img.size
+}
+
+horus = {
+    "horus_version": "1.0",
+    "source": "JPEG Image",
+    "metadata": info
+}
+
+with open("image_horus.json", "w") as f:
+    json.dump(horus, f, indent=2)
+
+print("JPEG image converted to HORUS format!")

@@ -1,0 +1,28 @@
+import pandas as pd
+import numpy as np
+
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie', None, 'Eve', 'Bob'],
+    'Age': [25, 'thirty', 35, 40, None, 25],
+    'Marks': [88, 92, 'N/A', 85, 90, 92],
+    'Email': ['alice@gmail.com', 'bob@gmail.com', 'charlie@gmail', '', 'eve@gmail.com', 'bob@gmail.com']
+}
+df = pd.DataFrame(data)
+print("Original Data:")
+print(df)
+
+df['Name'].fillna('Unknown', inplace=True)
+df['Age'] = pd.to_numeric(df['Age'], errors='coerce')  # convert to numeric, invalid -> NaN
+df['Marks'] = pd.to_numeric(df['Marks'], errors='coerce')
+
+df['Age'].fillna(df['Age'].mean(), inplace=True)
+df['Marks'].fillna(df['Marks'].mean(), inplace=True)
+
+df.drop_duplicates(inplace=True)
+df['Email_Valid'] = df['Email'].apply(lambda x: '@' in x and '.' in x)
+df.loc[~df['Email_Valid'], 'Email'] = np.nan
+df.drop(columns=['Email_Valid'], inplace=True)
+
+print("\nCleaned Data:")
+print(df)
+

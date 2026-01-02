@@ -1,0 +1,24 @@
+import xml.etree.ElementTree as ET
+import json
+
+input_file = "data.xml"
+output_file = "xml_horus.json"
+
+tree = ET.parse(input_file)
+root = tree.getroot()
+
+records = []
+for child in root:
+    record = {elem.tag: elem.text for elem in child}
+    records.append(record)
+
+horus = {
+    "horus_version": "1.0",
+    "source": "XML",
+    "records": records
+}
+
+with open(output_file, "w") as f:
+    json.dump(horus, f, indent=2)
+
+print("XML converted to HORUS format!")

@@ -1,0 +1,17 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+edges = [
+    ('A', 'B'),
+    ('A', 'C'),
+    ('B', 'D'),
+    ('C', 'D'),
+    ('D', 'E')
+]
+G = nx.DiGraph()
+G.add_edges_from(edges)
+print("Is the graph acyclic?", nx.is_directed_acyclic_graph(G))
+plt.figure(figsize=(8, 5))
+pos = nx.spring_layout(G, seed=42)
+nx.draw(G, pos, with_labels=True, node_size=1500, node_color='lightgreen', arrowsize=20, font_size=12)
+plt.title("Directed Acyclic Graph (DAG)", fontsize=14)
+plt.show()

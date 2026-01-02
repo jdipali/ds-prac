@@ -1,0 +1,20 @@
+import json
+import os
+import subprocess
+
+video_path = "video.mp4"
+
+cmd = f'ffprobe -v error -show_entries format=duration:stream=width,height -of json "{video_path}"'
+result = subprocess.check_output(cmd, shell=True).decode()
+metadata = json.loads(result)
+
+horus = {
+    "horus_version": "1.0",
+    "source": "Video",
+    "metadata": metadata
+}
+
+with open("video_horus.json", "w") as f:
+    json.dump(horus, f, indent=2)
+
+print("Video converted to HORUS format!")

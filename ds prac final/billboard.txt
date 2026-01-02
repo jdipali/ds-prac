@@ -1,0 +1,21 @@
+import pandas as pd
+data = {
+    'Ad_ID': [1, 2, 3, 4, 5],
+    'Content': [
+        'Summer Sale - Up to 50% Off!',
+        'New Arrival: Smart Watches',
+        'Grand Opening: City Mall',
+        'Healthy Living with FreshJuice',
+        'Tech Expo 2025 - Register Now!'
+    ],
+    'Category': ['Fashion', 'Electronics', 'Event', 'Health', 'Event'],
+    'Rating': [4.8, 4.3, 4.9, 4.2, 4.7],
+    'Views': [25000, 19000, 30000, 12000, 27000]
+}
+
+df = pd.DataFrame(data)
+df['Score'] = (df['Rating'] * 0.6) + (df['Views'] / df['Views'].max() * 0.4)
+selected = df.sort_values('Score', ascending=False).head(3)
+print(" Billboard Content Suggestions:")
+for _ , row in selected.iterrows():
+    print(f"• {row['Content']}  (Rating: {row['Rating']}, Views: {row['Views']})")

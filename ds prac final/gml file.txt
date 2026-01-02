@@ -1,0 +1,12 @@
+import pandas as pd
+import networkx as nx
+df = pd.read_csv("edges.csv")
+G = nx.DiGraph()   # use nx.Graph() for undirected
+for _, row in df.iterrows():
+    if 'Weight' in df.columns:
+        G.add_edge(row['Source'], row['Target'], weight=row['Weight'])
+    else:
+        G.add_edge(row['Source'], row['Target'])
+nx.write_gml(G, "network_graph.gml")
+
+print("✅ GML file 'network_graph.gml' generated successfully!")

@@ -1,0 +1,23 @@
+import networkx as nx
+import matplotlib.pyplot as plt
+connections = [
+    ('R1', 'R2', 2),
+    ('R2', 'R3', 3),
+    ('R1', 'R3', 1),
+    ('R3', 'R4', 4),
+    ('R2', 'R4', 2)
+]
+G = nx.Graph()
+
+for src, dest, cost in connections:
+G.add_edge(src, dest, weight=cost)
+pos = nx.spring_layout(G, seed=42)
+nx.draw_networkx_nodes(G, pos, node_size=1500, node_color='skyblue')
+nx.draw_networkx_edges(G, pos, width=2)
+nx.draw_networkx_labels(G, pos, font_size=12, font_weight='bold')
+edge_labels = nx.get_edge_attributes(G, 'weight')
+nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+plt.title("Network Routing Diagram", fontsize=14)
+plt.axis('off')
+plt.show()
+

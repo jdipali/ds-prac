@@ -1,0 +1,14 @@
+# STEP 1: Store raw data
+students = [
+    {"roll": 3, "name": "Amit", "marks": 78},
+    {"roll": 1, "name": "Bhakti", "marks": 85},
+    {"roll": 2, "name": "Ravi", "marks": 72}
+]
+
+# STEP 2: Organize data by sorting (Roll Number)
+organized_data = sorted(students, key=lambda x: x["roll"])
+
+# STEP 3: Display organized data
+print("Roll No\tName\tMarks")
+for s in organized_data:
+    print(s["roll"], "\t", s["name"], "\t", s["marks"])

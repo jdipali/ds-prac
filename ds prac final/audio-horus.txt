@@ -1,0 +1,19 @@
+import json
+import subprocess
+
+audio_path = "audio.mp3"
+
+cmd = f'ffprobe -v error -show_entries format=duration -of json "{audio_path}"'
+result = subprocess.check_output(cmd, shell=True).decode()
+metadata = json.loads(result)
+
+horus = {
+    "horus_version": "1.0",
+    "source": "Audio",
+    "metadata": metadata
+}
+
+with open("audio_horus.json", "w") as f:
+    json.dump(horus, f, indent=2)
+
+print("Audio converted to HORUS format!")

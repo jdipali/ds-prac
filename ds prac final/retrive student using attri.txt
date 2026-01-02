@@ -1,0 +1,25 @@
+students <- read.csv("students.csv")
+
+
+# Structure of data 
+str(students)
+
+# Summary statistics 
+summary(students)
+
+# Column names
+colnames(students)
+
+
+# Number of rows and columns 
+nrow(students)
+ncol(students)
+
+
+# Unique departments
+unique(students$Department)
+
+
+# Retrieve specific attribute: Names of top 3 scorers 
+top3 <- head(sorted_students$Name, 3)
+print(top3)

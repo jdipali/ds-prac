@@ -1,0 +1,19 @@
+# Install library if not available 
+# install.packages("ggplot2")
+library(ggplot2)
+iris_data <- data(iris)
+
+
+# Pattern 1: Distribution of Marks 
+ggplot(students, aes(x=Marks))
+geom_histogram(binwidth=5, fill="blue", color="black")
+ggtitle("Distribution of Student Marks")
+
+# Pattern 2: Gender vs Marks
+ggplot(students, aes(x=Gender, y=Marks, fill=Gender)) + geom_boxplot() +
+ggtitle("Marks Distribution by Gender")
+
+
+# Pattern 3: Department-wise performance
+ggplot(students, aes(x=Department, y=Marks, fill=Department)) + geom_bar(stat="summary", fun="mean") +
+ggtitle("Average Marks by Department")

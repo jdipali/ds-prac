@@ -1,0 +1,23 @@
+import json
+
+input_file = "data.json"
+output_file = "json_horus.json"
+
+with open(input_file, "r") as f:
+    data = json.load(f)
+
+if isinstance(data, dict):
+    records = [data]
+else:
+    records = data
+
+horus = {
+    "horus_version": "1.0",
+    "source": "JSON",
+    "records": records
+}
+
+with open(output_file, "w") as f:
+    json.dump(horus, f, indent=2)
+
+print("JSON converted to HORUS format!")

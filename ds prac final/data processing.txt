@@ -1,0 +1,36 @@
+# Load dataset
+students <- read.csv("students.csv")
+
+
+# View first few rows
+ head(students)
+
+# Data Cleaning: Handle missing values (if any)
+ 
+
+students <- na.omit(students)
+
+# Transformation: Convert Gender and Department to factors 
+students$Gender <- as.factor(students$Gender)
+students$Department <- as.factor(students$Department)
+
+
+# Normalization of Marks (0–1 scale)
+students$NormMarks <- (students$Marks - min(students$Marks)) / (max(students$Marks) - min(students$Marks))
+
+# Filtering: Students with marks above 80
+ high_achievers <- subset(students, Marks > 80)
+
+# Sorting: By Marks in descending order
+
+ sorted_students <- students[order(-students$Marks), ]
+
+# Grouping: Average marks by Department
+dept_avg <- aggregate(Marks ~ Department, data=students, FUN=mean)
+
+
+print(high_achievers)
+
+print(sorted_students)
+ 
+print(dept_avg)
