@@ -1,0 +1,26 @@
+import networkx as nx
+# Step 1: Given delivery route data (distance/cost)
+27
+MSC.I.T PART1 YEAR 2025-26
+# Nodes represent locations, edges represent distance
+routes = [
+ ("Warehouse", "A", 4),
+ ("Warehouse", "B", 6),
+ ("A", "C", 5),
+ ("B", "C", 3),
+ ("C", "D", 4),
+("B", "D", 8)
+]
+# Step 2: Create graph
+G = nx.Graph()
+G.add_weighted_edges_from(routes)
+# Step 3: Define start and end locations
+start = "Warehouse"
+end = "D"
+# Step 4: Find optimal delivery route
+delivery_route = nx.shortest_path(G, source=start, target=end, weight="weight")
+total_distance = nx.shortest_path_length(G, source=start, target=end, weight="weight")
+# Step 5: Display result
+print("Optimal Delivery Route:")
+print(" -> ".join(delivery_route))
+print("Total Distance:", total_distance)

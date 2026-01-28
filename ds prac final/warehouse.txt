@@ -1,0 +1,18 @@
+import pandas as pd
+# Step 1: Create customer data
+data = {
+"Customer": ["C1", "C2", "C3", "C4"],
+"X_Coordinate": [10, 20, 30, 40],
+"Y_Coordinate": [15, 25, 20, 30],
+"Demand": [100, 150, 120, 130]
+}
+df = pd.DataFrame(data)
+print("Customer Data:")
+print(df)
+# Step 2: Apply Center of Gravity method
+total_demand = df["Demand"].sum()
+warehouse_x = (df["X_Coordinate"] * df["Demand"]).sum() / total_demand
+warehouse_y = (df["Y_Coordinate"] * df["Demand"]).sum() / total_demand
+print("\nOptimal Warehouse Location:")
+print("X Coordinate:", round(warehouse_x, 2))
+print("Y Coordinate:", round(warehouse_y, 2))

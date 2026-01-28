@@ -1,0 +1,25 @@
+import pandas as pd
+28
+MSC.I.T PART1 YEAR 2025-26
+# Step 1: Given forex data
+data = {
+ "Currency_Pair": ["USD/INR", "EUR/USD", "GBP/USD", "USD/JPY"],
+ "Previous_Price": [82.10, 1.08, 1.25, 145.50],
+ "Current_Price": [82.45, 1.06, 1.28, 144.80]
+}
+df = pd.DataFrame(data)
+print("Forex Market Data:")
+print(df)
+# Step 2: Trading decision logic
+def trading_decision(row):
+ if row["Current_Price"] > row["Previous_Price"]:
+ return "BUY"
+ elif row["Current_Price"] < row["Previous_Price"]:
+ return "SELL"
+ else:
+ return "HOLD"
+# Step 3: Apply trading planner
+df["Trading_Action"] = df.apply(trading_decision, axis=1)
+# Step 4: Display trading plan
+print("\nForex Trading Planner:")
+print(df[["Currency_Pair", "Trading_Action"]])

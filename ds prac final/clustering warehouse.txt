@@ -1,0 +1,28 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+# Step 1: Given customer location data
+data = {
+"Customer": ["C1", "C2", "C3", "C4", "C5", "C6"],
+"X": [10, 12, 25, 30, 42, 45],
+"Y": [15, 18, 22, 28, 35, 38]
+}
+df = pd.DataFrame(data)
+print("Customer Location Data:")
+print(df)
+# Step 2: Apply K-Means clustering
+X = df[["X", "Y"]]
+kmeans = KMeans(n_clusters=2, random_state=42)
+df["Cluster"] = kmeans.fit_predict(X)
+# Step 3: Get warehouse locations (cluster centers)
+centers = kmeans.cluster_centers_
+print("\nProposed Warehouse Locations:")
+for i, center in enumerate(centers):
+print(f"Warehouse {i+1}: X = {round(center[0], 2)}, Y = {round(center[1], 2)}")
+# Step 4: Visualize clusters and warehouse locations
+plt.scatter(df["X"], df["Y"], c=df["Cluster"], s=100)
+plt.scatter(centers[:, 0], centers[:, 1], marker='X', s=200)
+plt.xlabel("X Coordinate")
+plt.ylabel("Y Coordinate")
+plt.title("Warehouse Location Planning Using Clustering")
+plt.show()

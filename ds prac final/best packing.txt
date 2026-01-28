@@ -1,0 +1,18 @@
+import pandas as pd
+# Step 1: Given packing options data
+data = {
+ "Packing_Option": ["Small Box", "Medium Box", "Large Box", "Pallet"],
+ "Container_Utilization_%": [60, 75, 90, 85],
+ "Cost": [5000, 7000, 9000, 8500]
+}
+df = pd.DataFrame(data)
+print("Available Packing Options:")
+print(df)
+# Step 2: Determine best packing option
+# Criteria: Highest utilization with lowest cost per utilization
+df["Cost_Efficiency"] = df["Cost"] / df["Container_Utilization_%"]
+best_option = df.loc[df["Cost_Efficiency"].idxmin()]
+# Step 3: Keep only the best packing option (delete others)
+best_packing_df = df.loc[[df["Cost_Efficiency"].idxmin()]]
+print("\nBest Packing Option Selected:")
+print(best_packing_df.drop(columns=["Cost_Efficiency"]))

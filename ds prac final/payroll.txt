@@ -1,0 +1,24 @@
+import pandas as pd
+# Step 1: Given employee data
+data = {
+"Employee_ID": [101, 102, 103],
+"Employee_Name": ["Amit", "Riya", "Sonal"],
+"Basic_Salary": [30000, 35000, 40000]
+}
+df = pd.DataFrame(data)
+print("Employee Data:")
+print(df)
+# Step 2: Payroll calculations
+# Assumptions:
+# HRA = 20% of Basic Salary
+# DA = 10% of Basic Salary
+# PF Deduction = 12% of Basic Salary
+df["HRA"] = df["Basic_Salary"] * 0.20
+df["DA"] = df["Basic_Salary"] * 0.10
+df["PF"] = df["Basic_Salary"] * 0.12
+# Step 3: Calculate Gross and Net Salary
+df["Gross_Salary"] = df["Basic_Salary"] + df["HRA"] + df["DA"]
+df["Net_Salary"] = df["Gross_Salary"] - df["PF"]
+# Step 4: Display Payroll
+print("\nGenerated Payroll:")
+print(df)

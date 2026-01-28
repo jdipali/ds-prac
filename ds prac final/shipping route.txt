@@ -1,0 +1,26 @@
+import networkx as nx
+# Step 1: Create shipping route data (Graph)
+# Nodes represent cities, edges represent shipping cost/distance
+routes = [
+25
+MSC.I.T PART1 YEAR 2025-26
+ ("India", "Dubai", 4),
+ ("India", "Singapore", 6),
+ ("Dubai", "Europe", 5),
+ ("Singapore", "Europe", 7),
+ ("Dubai", "USA", 10),
+ ("Europe", "USA", 4)
+]
+# Step 2: Create weighted graph
+G = nx.Graph()
+G.add_weighted_edges_from(routes)
+# Step 3: Define source and destination
+source = "India"
+destination = "USA"
+# Step 4: Find best-fit (shortest) shipping route
+best_route = nx.shortest_path(G, source=source, target=destination, weight="weight")
+total_cost = nx.shortest_path_length(G, source=source, target=destination, weight="weight")
+# Step 5: Display result
+print("Best Shipping Route:")
+print(" -> ".join(best_route))
+print("Total Shipping Cost:", total_cost)

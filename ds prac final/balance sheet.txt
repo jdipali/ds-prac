@@ -1,0 +1,22 @@
+import pandas as pd
+import numpy as np
+# Step 1: Given balance sheet data (raw data with errors)
+data = {
+ "Account": ["Cash", "Inventory", "Accounts Receivable", "Fixed Assets", "Cash"],
+ "Amount": [50000, -20000, 30000, None, 50000]
+}
+df = pd.DataFrame(data)
+print("Raw Balance Sheet Data:")
+print(df)
+# Step 2: Data Cleaning
+# Remove missing values
+df_cleaned = df.dropna()
+# Remove negative amounts (invalid financial data)
+df_cleaned = df_cleaned[df_cleaned["Amount"] >= 0]
+# Remove duplicate records
+df_cleaned = df_cleaned.drop_duplicates()
+print("\nProcessed Balance Sheet (Only Good Data):")
+print(df_cleaned)
+# Step 3: Calculate total assets
+total_assets = df_cleaned["Amount"].sum()
+print("\nTotal Assets:", total_assets)
