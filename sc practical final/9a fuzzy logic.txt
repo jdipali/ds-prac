@@ -1,7 +1,7 @@
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-print("Name : Juita Raut")
-print("Roll No : 00")
+print("Name : xyz")
+print("Roll No : 59")
 s1 = "I love fuzzysforfuzzys"
 s2 = "I am loving fuzzysforfuzzys"
 print ("FuzzyWuzzy Ratio:", fuzz.ratio(s1, s2))
